@@ -12,7 +12,7 @@ fn print_tags(ltitle: &str, tags: &HashSet<String>) {
 fn main() {
     use clap::{crate_version, Arg};
 
-    let matches = clap::App::new("zstagbrowse")
+    let matches = clap::App::new("zstagit")
         .version(crate_version!())
         .author("Erik Zscheile <erik.zscheile@gmail.com>")
         .about("tag editor")
