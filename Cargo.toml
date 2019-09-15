@@ -1,0 +1,16 @@
+[package]
+name = "zstagbrowse"
+version = "0.0.0"
+authors = ["Erik Zscheile <erik.zscheile@gmail.com>"]
+edition = "2018"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/zserik/zstagbrowse"
+
+[dependencies]
+clap = "2.33.0"
+xattr = "0.2.2"
+walkdir = "2.2.9"
+failure = "0.1.5"
+symlink = "0.1.0"
+path-clean = "0.1.0"
+pathdiff = "0.1.0"
