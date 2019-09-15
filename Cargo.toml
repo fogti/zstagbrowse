@@ -22,7 +22,3 @@ default = ["persy", "xattr"]
 [lib]
 name = "zstags"
 path = "src/lib.rs"
-
-[[bin]]
-name = "zstagbrowse"
-path = "src/main.rs"

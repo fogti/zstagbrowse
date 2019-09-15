@@ -76,6 +76,8 @@ fn main() {
             Arg::with_name("backend")
                 .long("backend")
                 .short("b")
+                .takes_value(true)
+                .required(true)
                 .help("specifies the backend (where the association {FILE -> TAGS*} is stored)"),
         )
         .arg(
