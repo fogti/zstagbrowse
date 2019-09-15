@@ -1,3 +1,4 @@
+use ::zstags::*;
 use std::{
     collections::HashSet,
     fs,
@@ -16,18 +17,8 @@ struct Query {
 }
 
 impl Query {
-    fn matches_intern(&self, path: &Path) -> Result<HashSet<String>, failure::Error> {
-        match xattr::get(path, "user.zstags")? {
-            Some(x) => x
-                .split(|x| *x == 0 || *x == b'|')
-                .map(|x| Ok(String::from(std::str::from_utf8(x)?)))
-                .collect::<Result<HashSet<_>, failure::Error>>(),
-            None => Ok(HashSet::new()),
-        }
-    }
-
-    pub fn matches(&self, path: &Path) -> bool {
-        match self.matches_intern(path) {
+    pub fn matches(&self, path: &Path, backend: impl AsRef<dyn Backend>) -> bool {
+        match backend.as_ref().tags(path) {
             Ok(tags_on_file) => {
                 let icnt = self.tags.intersection(&tags_on_file).count();
                 match self.foldop {
@@ -36,7 +27,7 @@ impl Query {
                 }
             }
             Err(x) => {
-                eprintln!("{}: unable to access xattrs: {:?}", path.display(), x);
+                eprintln!("{}: unable to access tags: {:?}", path.display(), x);
                 false
             }
         }
@@ -49,25 +40,6 @@ fn is_not_hidden(entry: &DirEntry) -> bool {
         .to_str()
         .map(|s| entry.depth() == 0 || !s.starts_with("."))
         .unwrap_or(false)
-}
-
-fn normalize_path(path: &Path, new_base: &Path) -> std::io::Result<PathBuf> {
-    fn get_absolute_path(path: &Path) -> std::io::Result<PathBuf> {
-        use path_clean::PathClean;
-        Ok(if path.is_absolute() {
-            path.to_path_buf()
-        } else {
-            std::env::current_dir()?.join(path)
-        }
-        .clean())
-    }
-
-    let path = get_absolute_path(path)?;
-    let new_base = get_absolute_path(new_base)?;
-    Ok(match pathdiff::diff_paths(&path, &new_base) {
-        Some(x) => x,
-        None => path,
-    })
 }
 
 fn main() {
@@ -101,6 +73,12 @@ fn main() {
                 .help("specifies the query folding operation (defaults to '&')"),
         )
         .arg(
+            Arg::with_name("backend")
+                .long("backend")
+                .short("b")
+                .help("specifies the backend (where the association {FILE -> TAGS*} is stored)"),
+        )
+        .arg(
             Arg::with_name("QUERY")
                 .required(true)
                 .multiple(true)
@@ -130,6 +108,9 @@ fn main() {
         panic!("{}: is not a directory", source.display());
     }
 
+    let backend =
+        create_backend(matches.value_of("backend").unwrap()).expect("unable to initialize backend");
+
     match fs::remove_dir_all(target) {
         Ok(_) => {}
         Err(x) if x.kind() == std::io::ErrorKind::NotFound => {}
@@ -146,7 +127,7 @@ fn main() {
         .filter_entry(|e| is_not_hidden(e))
         .filter_map(|v| v.ok())
         .filter_map(|v| {
-            if query.matches(v.path()) {
+            if query.matches(v.path(), &backend) {
                 Some(v)
             } else {
                 None
