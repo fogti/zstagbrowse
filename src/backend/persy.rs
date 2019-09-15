@@ -70,34 +70,4 @@ impl Backend for PersyBackend {
         self.persy.commit(prepared)?;
         Ok(())
     }
-
-    fn add_tag(&mut self, path: &Path, tag: String) -> Result<(), failure::Error> {
-        let path_as_str = self.mangle_path(path)?.to_string_lossy().into_owned();
-        let mut tx = self.persy.begin()?;
-        self.persy.remove::<String, String>(
-            &mut tx,
-            "zstags",
-            path_as_str.clone(),
-            Some(tag.clone()),
-        )?;
-        self.persy
-            .put::<String, String>(&mut tx, "zstags", path_as_str, tag)?;
-        let prepared = self.persy.prepare_commit(tx)?;
-        self.persy.commit(prepared)?;
-        Ok(())
-    }
-
-    fn delete_tag(&mut self, path: &Path, tag: &str) -> Result<(), failure::Error> {
-        let path_as_str = self.mangle_path(path)?.to_string_lossy().into_owned();
-        let mut tx = self.persy.begin()?;
-        self.persy.remove::<String, String>(
-            &mut tx,
-            "zstags",
-            path_as_str,
-            Some(tag.to_owned()),
-        )?;
-        let prepared = self.persy.prepare_commit(tx)?;
-        self.persy.commit(prepared)?;
-        Ok(())
-    }
 }

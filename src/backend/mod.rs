@@ -4,18 +4,6 @@ pub use std::{collections::HashSet, path::Path};
 pub trait Backend {
     fn tags(&self, path: &Path) -> Result<HashSet<String>, failure::Error>;
     fn set_tags(&mut self, path: &Path, tags: HashSet<String>) -> Result<(), failure::Error>;
-
-    fn add_tag(&mut self, path: &Path, tag: String) -> Result<(), failure::Error> {
-        let mut tags = self.tags(path)?;
-        tags.insert(tag);
-        self.set_tags(path, tags)
-    }
-
-    fn delete_tag(&mut self, path: &Path, tag: &str) -> Result<(), failure::Error> {
-        let mut tags = self.tags(path)?;
-        tags.remove(tag);
-        self.set_tags(path, tags)
-    }
 }
 
 #[cfg(feature = "persy")]
