@@ -1,8 +1,5 @@
 use ::zstags::*;
-use std::{
-    collections::HashSet,
-    path::Path,
-};
+use std::{collections::HashSet, path::Path};
 
 fn print_tags(ltitle: &str, tags: &HashSet<String>) {
     print!("{}:", ltitle);
@@ -38,7 +35,7 @@ fn main() {
         .arg(
             Arg::with_name("verbose")
                 .long("verbose")
-                .help("increase verbosity")
+                .help("increase verbosity"),
         )
         .arg(
             Arg::with_name("TAGMODS")
@@ -68,8 +65,12 @@ fn main() {
         let msc = ici.next().unwrap();
         let rest = ici.collect();
         match msc {
-            '+' => { tags.insert(rest); }
-            '-' => { tags.remove(&rest); }
+            '+' => {
+                tags.insert(rest);
+            }
+            '-' => {
+                tags.remove(&rest);
+            }
             _ => eprintln!("got invalid tag modifier: '{}'", i),
         }
     }
@@ -78,5 +79,7 @@ fn main() {
         print_tags("new tags", &tags);
     }
 
-    backend.set_tags(&filepath, tags).expect("unable to write tags");
+    backend
+        .set_tags(&filepath, tags)
+        .expect("unable to write tags");
 }

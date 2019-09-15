@@ -38,7 +38,7 @@ fn is_not_hidden(entry: &DirEntry) -> bool {
     entry
         .file_name()
         .to_str()
-        .map(|s| entry.depth() == 0 || !s.starts_with("."))
+        .map(|s| entry.depth() == 0 || !s.starts_with('.'))
         .unwrap_or(false)
 }
 
@@ -129,11 +129,8 @@ fn main() {
         .filter_entry(|e| is_not_hidden(e))
         .filter_map(|v| v.ok())
         .filter_map(|v| {
-            if query.matches(v.path(), &backend) {
-                Some(v)
-            } else {
-                None
-            }
+            use boolinator::Boolinator;
+            query.matches(v.path(), &backend).as_some(v)
         })
         .map(|v| v.path().into())
         .collect();

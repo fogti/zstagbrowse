@@ -1,5 +1,5 @@
-pub use std::{collections::HashSet, path::Path};
 use failure::bail;
+pub use std::{collections::HashSet, path::Path};
 
 pub trait Backend {
     fn tags(&self, path: &Path) -> Result<HashSet<String>, failure::Error>;

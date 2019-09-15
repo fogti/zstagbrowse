@@ -16,8 +16,5 @@ pub fn get_absolute_path(path: &Path) -> std::io::Result<PathBuf> {
 pub fn normalize_path(path: &Path, new_base: &Path) -> std::io::Result<PathBuf> {
     let path = get_absolute_path(path)?;
     let new_base = get_absolute_path(new_base)?;
-    Ok(match pathdiff::diff_paths(&path, &new_base) {
-        Some(x) => x,
-        None => path,
-    })
+    Ok(pathdiff::diff_paths(&path, &new_base).unwrap_or(path))
 }
