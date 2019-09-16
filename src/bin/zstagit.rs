@@ -45,7 +45,10 @@ fn main() {
         )
         .get_matches();
 
-    let filepath = Path::new(matches.value_of("file").unwrap());
+    let filepath = get_absolute_path(
+        &Path::new(matches.value_of("file").unwrap()),
+        &std::env::current_dir().unwrap(),
+    );
     let is_verbose = matches.is_present("verbose");
 
     let mut backend =
@@ -57,6 +60,8 @@ fn main() {
         print_tags("old tags", &tags);
     }
 
+    let mut is_changed = false;
+
     for i in matches.values_of("TAGMODS").unwrap() {
         if i.len() < 2 {
             eprintln!("got invalid tag modifier: '{}'", i);
@@ -64,22 +69,27 @@ fn main() {
         let mut ici = i.chars();
         let msc = ici.next().unwrap();
         let rest = ici.collect();
-        match msc {
-            '+' => {
-                tags.insert(rest);
+        is_changed |= match msc {
+            '+' => tags.insert(rest),
+            '-' => tags.remove(&rest),
+            _ => {
+                eprintln!("got invalid tag modifier: '{}'", i);
+                false
             }
-            '-' => {
-                tags.remove(&rest);
-            }
-            _ => eprintln!("got invalid tag modifier: '{}'", i),
+        };
+    }
+
+    if is_changed {
+        if is_verbose {
+            print_tags("new tags", &tags);
+        }
+
+        backend
+            .set_tags(&filepath, tags)
+            .expect("unable to write tags");
+    } else {
+        if is_verbose {
+            println!("no tags changed");
         }
     }
-
-    if is_verbose {
-        print_tags("new tags", &tags);
-    }
-
-    backend
-        .set_tags(&filepath, tags)
-        .expect("unable to write tags");
 }

@@ -70,6 +70,7 @@ fn main() {
             Arg::with_name("foldop")
                 .long("foldop")
                 .short("o")
+                .takes_value(true)
                 .help("specifies the query folding operation (defaults to '&')"),
         )
         .arg(
@@ -88,8 +89,9 @@ fn main() {
         )
         .get_matches();
 
+    let curdir = std::env::current_dir().unwrap();
     let source: &Path = Path::new(matches.value_of("source").unwrap());
-    let target: &Path = Path::new(matches.value_of("target").unwrap());
+    let target = get_absolute_path(Path::new(matches.value_of("target").unwrap()), &curdir);
 
     let foldop = match matches.value_of("foldop").unwrap_or("&") {
         "&" | "&&" => FoldOp::And,
@@ -113,7 +115,7 @@ fn main() {
     let backend =
         create_backend(matches.value_of("backend").unwrap()).expect("unable to initialize backend");
 
-    match fs::remove_dir_all(target) {
+    match fs::remove_dir_all(&target) {
         Ok(_) => {}
         Err(x) if x.kind() == std::io::ErrorKind::NotFound => {}
         Err(x) => panic!(
@@ -122,17 +124,17 @@ fn main() {
             x
         ),
     }
-    fs::create_dir_all(target).expect("failed to create target directory");
+    fs::create_dir_all(&target).expect("failed to create target directory");
 
     let selfiles: Vec<PathBuf> = WalkDir::new(source)
         .into_iter()
         .filter_entry(|e| is_not_hidden(e))
         .filter_map(|v| v.ok())
+        .map(|v| get_absolute_path(v.path(), &curdir))
         .filter_map(|v| {
             use boolinator::Boolinator;
-            query.matches(v.path(), &backend).as_some(v)
+            query.matches(&v, &backend).as_some(v)
         })
-        .map(|v| v.path().into())
         .collect();
 
     let max_id_padding = format!("{}", selfiles.len()).len();
@@ -142,15 +144,15 @@ fn main() {
         if let Some(ext) = trgpath.extension() {
             lnkpath.set_extension(ext);
         }
-        let trgpath = normalize_path(&trgpath, target).expect("failed to normalize path");
-        println!("{} -> {}", lnkpath.display(), trgpath.display());
+        let trgpath = normalize_path(&trgpath, &target);
+        print!(
+            "{} -> {}",
+            lnkpath.file_name().unwrap().to_str().unwrap(),
+            trgpath.display()
+        );
         if let Err(x) = symlink::symlink_auto(&trgpath, &lnkpath) {
-            eprintln!(
-                "{} -> {}: failed to create symlink: {:?}",
-                lnkpath.display(),
-                trgpath.display(),
-                x
-            );
+            print!(": failed to create symlink: {:?}", x);
         }
+        println!();
     }
 }

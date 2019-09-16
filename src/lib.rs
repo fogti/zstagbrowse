@@ -3,18 +3,18 @@ use std::path::{Path, PathBuf};
 mod backend;
 pub use backend::{create_backend, Backend};
 
-pub fn get_absolute_path(path: &Path) -> std::io::Result<PathBuf> {
+pub fn get_absolute_path(path: &Path, cur_dir: &Path) -> PathBuf {
     use path_clean::PathClean;
-    Ok(if path.is_absolute() {
+    if path.is_absolute() {
         path.to_path_buf()
     } else {
-        std::env::current_dir()?.join(path)
+        cur_dir.join(path)
     }
-    .clean())
+    .clean()
 }
 
-pub fn normalize_path(path: &Path, new_base: &Path) -> std::io::Result<PathBuf> {
-    let path = get_absolute_path(path)?;
-    let new_base = get_absolute_path(new_base)?;
-    Ok(pathdiff::diff_paths(&path, &new_base).unwrap_or(path))
+pub fn normalize_path(path: &Path, new_base: &Path) -> PathBuf {
+    assert!(path.is_absolute());
+    assert!(new_base.is_absolute());
+    pathdiff::diff_paths(&path, &new_base).unwrap_or(path.to_path_buf())
 }
