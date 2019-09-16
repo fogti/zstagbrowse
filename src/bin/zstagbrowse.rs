@@ -9,6 +9,7 @@ use walkdir::{DirEntry, WalkDir};
 enum FoldOp {
     And,
     Or,
+    Xor,
 }
 
 struct Query {
@@ -24,6 +25,7 @@ impl Query {
                 match self.foldop {
                     FoldOp::And => icnt == self.tags.len(),
                     FoldOp::Or => icnt != 0,
+                    FoldOp::Xor => icnt == 1,
                 }
             }
             Err(x) => {
@@ -96,6 +98,7 @@ fn main() {
     let foldop = match matches.value_of("foldop").unwrap_or("&") {
         "&" | "&&" => FoldOp::And,
         "|" | "||" => FoldOp::Or,
+        "^" | "^^" => FoldOp::Xor,
         x => panic!("'{}': unknown foldop", x),
     };
 
