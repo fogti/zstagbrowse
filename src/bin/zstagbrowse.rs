@@ -1,10 +1,5 @@
 use ::zstags::*;
-use std::{
-    collections::HashSet,
-    fs,
-    path::{Path, PathBuf},
-};
-use walkdir::{DirEntry, WalkDir};
+use std::{collections::HashSet, fs, path::PathBuf};
 
 enum FoldOp {
     And,
@@ -34,14 +29,6 @@ impl Query {
             }
         }
     }
-}
-
-fn is_not_hidden(entry: &DirEntry) -> bool {
-    entry
-        .file_name()
-        .to_str()
-        .map(|s| entry.depth() == 0 || !s.starts_with('.'))
-        .unwrap_or(false)
 }
 
 fn main() {
@@ -129,11 +116,7 @@ fn main() {
     }
     fs::create_dir_all(&target).expect("failed to create target directory");
 
-    let selfiles: Vec<PathBuf> = WalkDir::new(source)
-        .into_iter()
-        .filter_entry(|e| is_not_hidden(e))
-        .filter_map(|v| v.ok())
-        .map(|v| get_absolute_path(v.path(), &curdir))
+    let selfiles: Vec<PathBuf> = iter_dir_nonhid_abs(source, &curdir)
         .filter_map(|v| {
             use boolinator::Boolinator;
             query.matches(&v, &backend).as_some(v)

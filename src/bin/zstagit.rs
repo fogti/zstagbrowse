@@ -1,13 +1,4 @@
 use ::zstags::*;
-use std::{collections::HashSet, path::Path};
-
-fn print_tags(ltitle: &str, tags: &HashSet<String>) {
-    print!("{}:", ltitle);
-    for i in tags {
-        print!(" {}", i);
-    }
-    println!();
-}
 
 fn main() {
     use clap::{crate_version, Arg};

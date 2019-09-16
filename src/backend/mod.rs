@@ -1,4 +1,3 @@
-use failure::bail;
 pub use std::{collections::HashSet, path::Path};
 
 pub trait Backend {
@@ -15,6 +14,7 @@ mod xattr;
 /// bspec :: "<schema>[:<subspec>]"
 #[allow(unused_variables)]
 pub fn create_backend(bspec: &str) -> Result<Box<dyn Backend>, failure::Error> {
+    use failure::bail;
     let mut bssit = bspec.split(|x| x == ':');
     let bschema = bssit.next().unwrap();
     let brest: Vec<_> = bssit.collect();
