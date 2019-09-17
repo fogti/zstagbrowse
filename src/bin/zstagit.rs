@@ -78,9 +78,7 @@ fn main() {
         backend
             .set_tags(&filepath, tags)
             .expect("unable to write tags");
-    } else {
-        if is_verbose {
-            println!("no tags changed");
-        }
+    } else if is_verbose {
+        println!("no tags changed");
     }
 }

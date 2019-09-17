@@ -1,5 +1,5 @@
 pub use std::path::Path;
-use std::{collections::HashSet, path::PathBuf};
+use std::{collections::HashSet, hash::BuildHasher, path::PathBuf};
 
 mod backend;
 pub use backend::{create_backend, Backend};
@@ -17,10 +17,10 @@ pub fn get_absolute_path(path: &Path, cur_dir: &Path) -> PathBuf {
 pub fn normalize_path(path: &Path, new_base: &Path) -> PathBuf {
     assert!(path.is_absolute());
     assert!(new_base.is_absolute());
-    pathdiff::diff_paths(&path, &new_base).unwrap_or(path.to_path_buf())
+    pathdiff::diff_paths(&path, &new_base).unwrap_or_else(|| path.to_path_buf())
 }
 
-pub fn print_tags(ltitle: &str, tags: &HashSet<String>) {
+pub fn print_tags<H: BuildHasher>(ltitle: &str, tags: &HashSet<String, H>) {
     print!("{}:", ltitle);
     for i in tags {
         print!(" {}", i);

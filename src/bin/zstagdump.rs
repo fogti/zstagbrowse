@@ -37,7 +37,7 @@ fn main() {
     for i in iter_dir_nonhid_abs(source, &std::env::current_dir().unwrap()) {
         match backend.tags(&i) {
             Ok(ref tags) if !tags.is_empty() => print_tags(&format!("{}", i.display()), tags),
-            Ok(_) => {},
+            Ok(_) => {}
             Err(x) => eprintln!("{}: ERROR: {}", i.display(), x),
         }
     }
