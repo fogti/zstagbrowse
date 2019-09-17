@@ -71,6 +71,12 @@ fn main() {
                 .help("specifies the backend (where the association {FILE -> TAGS*} is stored)"),
         )
         .arg(
+            Arg::with_name("absolute")
+                .long("absolute")
+                .short("a")
+                .help("if specified, create absolute symlinks instead of relative ones"),
+        )
+        .arg(
             Arg::with_name("QUERY")
                 .required(true)
                 .multiple(true)
@@ -124,13 +130,16 @@ fn main() {
         .collect();
 
     let max_id_padding = format!("{}", selfiles.len()).len();
+    let abslnts = matches.is_present("absolute");
 
-    for (i, trgpath) in selfiles.into_iter().enumerate() {
+    for (i, mut trgpath) in selfiles.into_iter().enumerate() {
         let mut lnkpath = target.join(&format!("{:01$}", i, max_id_padding));
         if let Some(ext) = trgpath.extension() {
             lnkpath.set_extension(ext);
         }
-        let trgpath = normalize_path(&trgpath, &target);
+        if !abslnts {
+            trgpath = normalize_path(&trgpath, &target);
+        }
         print!(
             "{} -> {}",
             lnkpath.file_name().unwrap().to_str().unwrap(),
