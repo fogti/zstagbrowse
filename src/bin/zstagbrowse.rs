@@ -107,7 +107,7 @@ fn main() {
 
     match fs::remove_dir_all(&target) {
         Ok(_) => {}
-        Err(x) if x.kind() == std::io::ErrorKind::NotFound => {}
+        Err(ref x) if x.kind() == std::io::ErrorKind::NotFound => {}
         Err(x) => panic!(
             "{}: failed to clear target directory: {:?}",
             target.display(),
