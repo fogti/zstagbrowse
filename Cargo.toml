@@ -23,3 +23,6 @@ default = ["persy", "xattr"]
 [lib]
 name = "zstags"
 path = "src/lib.rs"
+
+[profile.release]
+lto = true
