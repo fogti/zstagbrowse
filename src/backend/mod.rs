@@ -1,8 +1,8 @@
 pub use std::{collections::HashSet, path::Path};
 
 pub trait Backend {
-    fn tags(&self, path: &Path) -> Result<HashSet<String>, failure::Error>;
-    fn set_tags(&mut self, path: &Path, tags: HashSet<String>) -> Result<(), failure::Error>;
+    fn tags(&self, path: &Path) -> Result<HashSet<String>, anyhow::Error>;
+    fn set_tags(&mut self, path: &Path, tags: HashSet<String>) -> Result<(), anyhow::Error>;
 }
 
 #[cfg(feature = "persy")]
@@ -13,8 +13,8 @@ mod xattr;
 
 /// bspec :: "<schema>[:<subspec>]"
 #[allow(unused_variables)]
-pub fn create_backend(bspec: &str) -> Result<Box<dyn Backend>, failure::Error> {
-    use failure::bail;
+pub fn create_backend(bspec: &str) -> Result<Box<dyn Backend>, anyhow::Error> {
+    use anyhow::bail;
     let mut bssit = bspec.split(|x| x == ':');
     let bschema = bssit.next().unwrap();
     let brest: Vec<_> = bssit.collect();

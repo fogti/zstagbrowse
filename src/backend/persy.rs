@@ -9,8 +9,8 @@ pub struct PersyBackend {
 
 impl PersyBackend {
     /// USAGE: persy:PERSY_PATH:NORM_PATH[:additional_modifier]
-    pub fn new(args: Vec<&str>) -> Result<PersyBackend, failure::Error> {
-        use failure::bail;
+    pub fn new(args: Vec<&str>) -> Result<PersyBackend, anyhow::Error> {
+        use anyhow::bail;
         if args.len() < 2 || args.len() > 3 {
             bail!("persy backend: invalid invocation (expects only 2 or 3 args)");
         }
@@ -44,7 +44,7 @@ impl PersyBackend {
 }
 
 impl Backend for PersyBackend {
-    fn tags(&self, path: &Path) -> Result<HashSet<String>, failure::Error> {
+    fn tags(&self, path: &Path) -> Result<HashSet<String>, anyhow::Error> {
         let path_as_str = self.mangle_path(path);
         Ok(self
             .persy
@@ -58,7 +58,7 @@ impl Backend for PersyBackend {
             .collect())
     }
 
-    fn set_tags(&mut self, path: &Path, tags: HashSet<String>) -> Result<(), failure::Error> {
+    fn set_tags(&mut self, path: &Path, tags: HashSet<String>) -> Result<(), anyhow::Error> {
         let path_as_str = self.mangle_path(path);
         let mut tx = self.persy.begin()?;
         self.persy
